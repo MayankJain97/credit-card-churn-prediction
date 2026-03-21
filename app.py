@@ -49,13 +49,31 @@ if st.button("Predict Churn", use_container_width=True):
 
     st.markdown("---")
 
-    if prediction == 1:
-        st.error(f"⚠️ Customer WILL churn  (Probability: {probability:.1%})")
-    else:
-        st.success(f"✅ Customer will NOT churn  (Probability: {probability:.1%})")
+   if prediction == 1:
+    st.error(f"⚠️ Customer WILL churn  (Probability: {probability:.1%})")
+    
+    st.write("### 📌 Business Recommendation:")
+    st.write("""
+    - Offer targeted retention incentives (cashback, fee waiver, reward points)
+    - Reduce financial stress by increasing credit limit or offering EMI options
+    - Proactively reach out via relationship manager or call center
+    - Monitor high-risk behavior (high utilization, late payments)
+    - Provide personalized offers based on spending pattern
+    """)
+
+else:
+    st.success(f"✅ Customer will NOT churn  (Probability: {probability:.1%})")
+    
+    st.write("### 📌 Business Recommendation:")
+    st.write("""
+    - Continue engagement through loyalty programs
+    - Upsell premium credit cards or higher credit limits
+    - Encourage more transactions via offers and rewards
+    - Maintain strong customer relationship through regular communication
+    - Cross-sell products like loans, insurance, or investments
+    """)
 
     st.write("**Input Summary:**")
     st.dataframe(input_data)
 
 st.markdown("---")
-st.caption("Model: Logistic Regression | Scaler: MinMaxScaler | Accuracy: ~79%")
