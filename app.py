@@ -82,7 +82,7 @@ if st.button("Predict Churn"):
         """)
 
     # Show input summary
-    st.write("### 📊 Input Summary:")
+    st.write("### Input Summary:")
     st.dataframe(input_df)
 
 st.markdown("---")
