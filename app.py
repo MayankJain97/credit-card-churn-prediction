@@ -1,39 +1,68 @@
 import streamlit as st
 import pandas as pd
 import pickle
+import numpy as np
+from sentence_transformers import SentenceTransformer
 
-# Load model
+# ================================
+# LOAD MODEL
+# ================================
 with open("churn_model.pkl", "rb") as f:
     payload = pickle.load(f)
 
-model  = payload["model"]     # FIXED (was lr)
+model  = payload["model"]
 scaler = payload["scaler"]
 
-# App title
-st.title("Credit Card Customer Churn Predictor")
-st.write("Enter customer details below and click **Predict Churn**.")
+# ================================
+# RAG KNOWLEDGE BASE
+# ================================
+faq_data = [
+    "High utilization ratio above 70% indicates financial stress and increases churn risk.",
+    "Customers with more than 5 late payments are highly likely to churn.",
+    "Low transaction activity means the customer is disengaged.",
+    "Retention strategies include cashback, EMI options, and proactive outreach.",
+    "Non-churn customers should be targeted for upselling and cross-selling.",
+    "High tenure customers are usually more loyal.",
+    "Low utilization and high transactions indicate a healthy customer."
+]
+
+embed_model = SentenceTransformer('all-MiniLM-L6-v2')
+faq_embeddings = embed_model.encode(faq_data)
+
+def retrieve_context(query):
+    query_embedding = embed_model.encode([query])[0]
+    scores = np.dot(faq_embeddings, query_embedding)
+    best_idx = np.argmax(scores)
+    return faq_data[best_idx]
+
+# ================================
+# APP UI
+# ================================
+st.title("💳 Credit Card Churn Prediction + AI Insights")
+st.write("Enter customer details and get churn prediction + business insights.")
 st.markdown("---")
 
-# Input fields
+# INPUTS
 col1, col2 = st.columns(2)
 
 with col1:
-    age = st.number_input("Age", min_value=18, max_value=100, value=35)
-    annual_income = st.number_input("Annual Income ($)", min_value=0, max_value=500000, value=50000, step=1000)
-    credit_limit = st.number_input("Credit Limit ($)", min_value=0, max_value=200000, value=10000, step=500)
-    total_transactions = st.number_input("Total Transactions (last year)", min_value=0, max_value=200, value=40)
+    age = st.number_input("Age", 18, 100, 35)
+    annual_income = st.number_input("Annual Income ($)", 0, 500000, 50000, step=1000)
+    credit_limit = st.number_input("Credit Limit ($)", 0, 200000, 10000, step=500)
+    total_transactions = st.number_input("Total Transactions", 0, 200, 40)
 
 with col2:
-    avg_utilization = st.slider("Avg Utilization Ratio", min_value=0.0, max_value=1.0, value=0.30, step=0.01)
-    late_payments = st.number_input("Late Payments (last year)", min_value=0, max_value=20, value=1)
-    tenure_years = st.number_input("Tenure (Years)", min_value=0, max_value=30, value=5)
+    avg_utilization = st.slider("Avg Utilization Ratio", 0.0, 1.0, 0.3)
+    late_payments = st.number_input("Late Payments", 0, 20, 1)
+    tenure_years = st.number_input("Tenure (Years)", 0, 30, 5)
 
 st.markdown("---")
 
-# Predict button
+# ================================
+# PREDICTION
+# ================================
 if st.button("Predict Churn"):
 
-    # 1. Prepare input (FIXED variable names)
     input_data = [[
         age,
         annual_income,
@@ -44,45 +73,62 @@ if st.button("Predict Churn"):
         tenure_years
     ]]
 
-    # Convert to DataFrame (BEST PRACTICE)
     input_df = pd.DataFrame(input_data, columns=[
         "Age", "Annual_Income", "Credit_Limit",
         "Total_Transactions", "Avg_Utilization_Ratio",
         "Late_Payments", "Tenure_Years"
     ])
 
-    # 2. Scale input
     input_scaled = scaler.transform(input_df)
 
-    # 3. Prediction
     prediction = model.predict(input_scaled)[0]
     probability = model.predict_proba(input_scaled)[0][1]
 
-    # 4. Output
+    # ================================
+    # OUTPUT
+    # ================================
     if prediction == 1:
-        st.error(f"⚠️ Customer WILL churn  (Probability: {probability:.1%})")
+        st.error(f"⚠️ Customer WILL churn (Probability: {probability:.1%})")
 
-        st.write("###  Business Recommendation:")
+        if probability > 0.8:
+            st.warning("🔥 High Risk Customer – Immediate Action Required")
+
+        st.write("### 📌 Business Recommendation:")
         st.write("""
-        - Offer targeted retention incentives (cashback, fee waiver, rewards)
+        - Offer targeted retention incentives (cashback, fee waiver)
         - Provide EMI options to reduce financial burden
-        - Proactively reach out via call/email
-        - Monitor high utilization and late payments
+        - Proactively reach out to customer
+        - Monitor high utilization & late payments
         """)
 
     else:
-        st.success(f"✅ Customer will NOT churn  (Probability: {probability:.1%})")
+        st.success(f"✅ Customer will NOT churn (Probability: {probability:.1%})")
 
-        st.write("### Business Recommendation:")
+        st.write("### 📌 Business Recommendation:")
         st.write("""
         - Upsell premium credit cards
-        - Increase engagement via rewards & offers
-        - Cross-sell loans, insurance, or investments
-        - Maintain relationship through personalized communication
+        - Increase engagement via rewards
+        - Cross-sell loans or insurance
+        - Maintain relationship with personalized offers
         """)
 
-    # Show input summary
-    st.write("### Input Summary:")
+    st.write("### 📊 Input Summary:")
     st.dataframe(input_df)
 
 st.markdown("---")
+
+# ================================
+# GEN AI FAQ (RAG)
+# ================================
+st.markdown("## 🤖 AI FAQ Assistant")
+
+user_query = st.text_input("Ask a question about customer behavior or churn:")
+
+if st.button("Get AI Insight"):
+    if user_query:
+        context = retrieve_context(user_query)
+
+        st.write("### 💡 Insight:")
+        st.write(context)
+    else:
+        st.warning("Please enter a question.")
