@@ -6,7 +6,7 @@ import pickle
 with open("churn_model.pkl", "rb") as f:
     payload = pickle.load(f)
 
-lr     = payload["model"]
+model  = payload["model"]     # FIXED (was lr)
 scaler = payload["scaler"]
 
 # App title
@@ -33,19 +33,26 @@ st.markdown("---")
 # Predict button
 if st.button("Predict Churn"):
 
-    # 1. Take inputs
+    # 1. Prepare input (FIXED variable names)
     input_data = [[
         age,
-        income,
+        annual_income,
         credit_limit,
-        transactions,
-        utilization,
+        total_transactions,
+        avg_utilization,
         late_payments,
-        tenure
+        tenure_years
     ]]
 
+    # Convert to DataFrame (BEST PRACTICE)
+    input_df = pd.DataFrame(input_data, columns=[
+        "Age", "Annual_Income", "Credit_Limit",
+        "Total_Transactions", "Avg_Utilization_Ratio",
+        "Late_Payments", "Tenure_Years"
+    ])
+
     # 2. Scale input
-    input_scaled = scaler.transform(input_data)
+    input_scaled = scaler.transform(input_df)
 
     # 3. Prediction
     prediction = model.predict(input_scaled)[0]
@@ -57,21 +64,25 @@ if st.button("Predict Churn"):
 
         st.write("###  Business Recommendation:")
         st.write("""
-        - Offer targeted retention incentives
-        - Provide EMI / reduce financial burden
-        - Personalized outreach
+        - Offer targeted retention incentives (cashback, fee waiver, rewards)
+        - Provide EMI options to reduce financial burden
+        - Proactively reach out via call/email
+        - Monitor high utilization and late payments
         """)
 
     else:
         st.success(f"✅ Customer will NOT churn  (Probability: {probability:.1%})")
 
-        st.write("###  Business Recommendation:")
+        st.write("### Business Recommendation:")
         st.write("""
-        - Upsell premium products
-        - Increase engagement
-        - Cross-sell services
+        - Upsell premium credit cards
+        - Increase engagement via rewards & offers
+        - Cross-sell loans, insurance, or investments
+        - Maintain relationship through personalized communication
         """)
-    st.write("**Input Summary:**")
-    st.dataframe(input_data)
+
+    # Show input summary
+    st.write("### 📊 Input Summary:")
+    st.dataframe(input_df)
 
 st.markdown("---")
