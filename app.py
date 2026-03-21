@@ -31,47 +31,46 @@ with col2:
 st.markdown("---")
 
 # Predict button
-if st.button("Predict Churn", use_container_width=True):
+if st.button("Predict Churn"):
 
-    input_data = pd.DataFrame([{
-        "Age"                   : age,
-        "Annual_Income"         : annual_income,
-        "Credit_Limit"          : credit_limit,
-        "Total_Transactions"    : total_transactions,
-        "Avg_Utilization_Ratio" : avg_utilization,
-        "Late_Payments"         : late_payments,
-        "Tenure_Years"          : tenure_years
-    }])
+    # 1. Take inputs
+    input_data = [[
+        age,
+        income,
+        credit_limit,
+        transactions,
+        utilization,
+        late_payments,
+        tenure
+    ]]
 
+    # 2. Scale input
     input_scaled = scaler.transform(input_data)
-    prediction   = lr.predict(input_scaled)[0]
-    probability  = lr.predict_proba(input_scaled)[0][1]
 
-    st.markdown("---")
-if prediction == 1:
-    st.error(f"⚠️ Customer WILL churn  (Probability: {probability:.1%})")
-    
-    st.write("### 📌 Business Recommendation:")
-    st.write("""
-    - Offer targeted retention incentives (cashback, fee waiver, reward points)
-    - Reduce financial stress by increasing credit limit or offering EMI options
-    - Proactively reach out via relationship manager or call center
-    - Monitor high-risk behavior (high utilization, late payments)
-    - Provide personalized offers based on spending pattern
-    """)
+    # 3. Prediction
+    prediction = model.predict(input_scaled)[0]
+    probability = model.predict_proba(input_scaled)[0][1]
 
-else:
-    st.success(f"✅ Customer will NOT churn  (Probability: {probability:.1%})")
-    
-    st.write("### 📌 Business Recommendation:")
-    st.write("""
-    - Continue engagement through loyalty programs
-    - Upsell premium credit cards or higher credit limits
-    - Encourage more transactions via offers and rewards
-    - Maintain strong customer relationship through regular communication
-    - Cross-sell products like loans, insurance, or investments
-    """)
-    
+    # 4. Output
+    if prediction == 1:
+        st.error(f"⚠️ Customer WILL churn  (Probability: {probability:.1%})")
+
+        st.write("###  Business Recommendation:")
+        st.write("""
+        - Offer targeted retention incentives
+        - Provide EMI / reduce financial burden
+        - Personalized outreach
+        """)
+
+    else:
+        st.success(f"✅ Customer will NOT churn  (Probability: {probability:.1%})")
+
+        st.write("###  Business Recommendation:")
+        st.write("""
+        - Upsell premium products
+        - Increase engagement
+        - Cross-sell services
+        """)
     st.write("**Input Summary:**")
     st.dataframe(input_data)
 
