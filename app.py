@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import pickle
 import numpy as np
-from sentence_transformers import SentenceTransformer
 
 # ================================
 # LOAD MODEL
