@@ -25,3 +25,6 @@ streamlit run app.py
 - Scaler: MinMaxScaler
 - Test Accuracy: ~79%
 - Dataset: 500 rows, 27% churn rate
+
+URL
+https://credit-card-churn-prediction-a7e7srnlptap32eemxzan9.streamlit.app/
