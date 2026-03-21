@@ -35,7 +35,7 @@ def retrieve_context(query):
 # ================================
 # UI
 # ================================
-st.title("💳 Credit Card Customer Churn Predictor")
+st.title("Credit Card Customer Churn Predictor")
 st.write("Enter customer details and get churn prediction with AI insights.")
 st.markdown("---")
 
@@ -89,7 +89,7 @@ if st.button("Predict Churn"):
         if probability > 0.8:
             st.warning("🔥 High Risk Customer – Immediate Action Required")
 
-        st.write("### 📌 Business Recommendation:")
+        st.write("### Business Recommendation:")
         st.write("""
         - Offer targeted retention incentives (cashback, fee waiver)
         - Provide EMI options to reduce financial burden
@@ -100,7 +100,7 @@ if st.button("Predict Churn"):
     else:
         st.success(f"✅ Customer will NOT churn (Probability: {probability:.1%})")
 
-        st.write("### 📌 Business Recommendation:")
+        st.write("###  Business Recommendation:")
         st.write("""
         - Upsell premium credit cards
         - Increase engagement via rewards
@@ -108,7 +108,7 @@ if st.button("Predict Churn"):
         - Maintain relationship with personalized offers
         """)
 
-    st.write("### 📊 Input Summary:")
+    st.write("### Input Summary:")
     st.dataframe(input_df)
 
 st.markdown("---")
@@ -116,7 +116,7 @@ st.markdown("---")
 # ================================
 # AI FAQ SECTION
 # ================================
-st.markdown("## 🤖 AI FAQ Assistant")
+st.markdown("## FAQ Assistant")
 
 user_query = st.text_input("Ask a question about customer behavior:")
 
@@ -124,7 +124,7 @@ if st.button("Get Insight"):
     if user_query:
         context = retrieve_context(user_query)
 
-        st.write("### 💡 Insight:")
+        st.write("### Insight:")
         st.write(context)
     else:
         st.warning("Please enter a question.")
