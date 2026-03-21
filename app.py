@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import pickle
-import numpy as np
 
 # ================================
 # LOAD MODEL
@@ -13,35 +12,33 @@ model  = payload["model"]
 scaler = payload["scaler"]
 
 # ================================
-# RAG KNOWLEDGE BASE
+# SIMPLE RAG FUNCTION (LIGHTWEIGHT)
 # ================================
-faq_data = [
-    "High utilization ratio above 70% indicates financial stress and increases churn risk.",
-    "Customers with more than 5 late payments are highly likely to churn.",
-    "Low transaction activity means the customer is disengaged.",
-    "Retention strategies include cashback, EMI options, and proactive outreach.",
-    "Non-churn customers should be targeted for upselling and cross-selling.",
-    "High tenure customers are usually more loyal.",
-    "Low utilization and high transactions indicate a healthy customer."
-]
-
-embed_model = SentenceTransformer('all-MiniLM-L6-v2')
-faq_embeddings = embed_model.encode(faq_data)
-
 def retrieve_context(query):
-    query_embedding = embed_model.encode([query])[0]
-    scores = np.dot(faq_embeddings, query_embedding)
-    best_idx = np.argmax(scores)
-    return faq_data[best_idx]
+    query = query.lower()
+
+    if "utilization" in query:
+        return "High utilization ratio (>70%) indicates financial stress and increases churn risk."
+    
+    elif "late payment" in query:
+        return "Customers with more than 5 late payments are highly likely to churn."
+    
+    elif "transaction" in query:
+        return "Low transaction activity indicates customer disengagement."
+    
+    elif "retain" in query or "reduce churn" in query:
+        return "Retention strategies include cashback, EMI options, and proactive outreach."
+    
+    else:
+        return "Customer churn depends on multiple factors like utilization, payments, and engagement."
 
 # ================================
-# APP UI
+# UI
 # ================================
-st.title("💳 Credit Card Churn Prediction + AI Insights")
-st.write("Enter customer details and get churn prediction + business insights.")
+st.title("💳 Credit Card Customer Churn Predictor")
+st.write("Enter customer details and get churn prediction with AI insights.")
 st.markdown("---")
 
-# INPUTS
 col1, col2 = st.columns(2)
 
 with col1:
@@ -117,13 +114,13 @@ if st.button("Predict Churn"):
 st.markdown("---")
 
 # ================================
-# GEN AI FAQ (RAG)
+# AI FAQ SECTION
 # ================================
 st.markdown("## 🤖 AI FAQ Assistant")
 
-user_query = st.text_input("Ask a question about customer behavior or churn:")
+user_query = st.text_input("Ask a question about customer behavior:")
 
-if st.button("Get AI Insight"):
+if st.button("Get Insight"):
     if user_query:
         context = retrieve_context(user_query)
 
@@ -131,3 +128,5 @@ if st.button("Get AI Insight"):
         st.write(context)
     else:
         st.warning("Please enter a question.")
+
+st.markdown("---")
