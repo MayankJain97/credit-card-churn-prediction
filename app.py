@@ -48,8 +48,7 @@ if st.button("Predict Churn", use_container_width=True):
     probability  = lr.predict_proba(input_scaled)[0][1]
 
     st.markdown("---")
-
-   if prediction == 1:
+if prediction == 1:
     st.error(f"⚠️ Customer WILL churn  (Probability: {probability:.1%})")
     
     st.write("### 📌 Business Recommendation:")
@@ -72,7 +71,7 @@ else:
     - Maintain strong customer relationship through regular communication
     - Cross-sell products like loans, insurance, or investments
     """)
-
+    
     st.write("**Input Summary:**")
     st.dataframe(input_data)
 
